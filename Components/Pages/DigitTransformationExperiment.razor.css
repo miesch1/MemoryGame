@@ -1,0 +1,392 @@
+.dte {
+    --ink: #1a1f2e;
+    --muted: #5c6478;
+    --bg: #f4f6fb;
+    --card-back: #3d4f7c;
+    --card-back-pattern: #2a3758;
+    --accent: #2563eb;
+    --ring: #93c5fd;
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.dte__header {
+    text-align: center;
+    margin-bottom: 0.9rem;
+}
+
+.dte__title {
+    font-size: clamp(1.5rem, 2.2vw, 1.75rem);
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    letter-spacing: 0.02em;
+}
+
+.dte__subtitle {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.45;
+    max-width: 40rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dte__metronome {
+    display: flex;
+    justify-content: center;
+    margin: 0 0 1rem;
+    min-height: 3.5rem;
+    align-items: center;
+}
+
+.dte__beat-ring {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    border: 0.35rem solid var(--ring);
+    background: white;
+    box-shadow: 0 0.15rem 0.4rem rgba(37, 99, 235, 0.15);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.2s;
+}
+
+.dte__beat-ring--pulse {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 0.4rem rgba(147, 197, 253, 0.45);
+    border-color: var(--accent);
+    animation: dte-beat 0.45s ease-out;
+}
+
+.dte__beat-ring--long {
+    border-color: var(--accent);
+    /* Full duration of the long rest — matches --dte-long-beat (set from Blazor) */
+    animation: dte-long var(--dte-long-beat, 2.5s) ease-in-out forwards;
+}
+
+@keyframes dte-beat {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.12);
+    }
+    100% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes dte-long {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0.15rem 0.4rem rgba(37, 99, 235, 0.15);
+    }
+    25% {
+        transform: scale(1.2);
+        box-shadow: 0 0 0 0.5rem rgba(147, 197, 253, 0.45);
+    }
+    70% {
+        transform: scale(1.12);
+        box-shadow: 0 0 0 0.35rem rgba(147, 197, 253, 0.3);
+    }
+    100% {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 0.2rem rgba(147, 197, 253, 0.2);
+    }
+}
+
+.dte__countdown-display {
+    text-align: center;
+    font-size: clamp(3rem, 10vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1;
+    margin: 0.25rem 0 0.5rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+}
+
+.dte__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    margin: 0 auto 1.5rem;
+    max-width: 48rem;
+}
+
+.dte__row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.9rem;
+}
+
+.dte__card {
+    aspect-ratio: 1 / 1.05;
+    perspective: 900px;
+}
+
+.dte__card--active {
+    filter: drop-shadow(0 0.15rem 0.35rem rgba(37, 99, 235, 0.35));
+}
+
+.dte__card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0.65rem;
+}
+
+.dte__card-inner--flipped {
+    transform: rotateY(180deg);
+}
+
+.dte__face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.65rem;
+    font-size: clamp(1.6rem, 4.2vw, 2.4rem);
+    font-weight: 800;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.12);
+}
+
+/* Do not use position: relative here — it overrides .dte__face absolute fill and collapses the card. */
+.dte__face.dte__face--back.dte__mario-block {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    transform: rotateY(0);
+    padding: 0;
+    overflow: hidden;
+    border: 0.2rem solid #202320;
+    border-radius: 0.2rem;
+    box-shadow:
+        0 0.15rem 0 #0d0d0d,
+        inset 0 0.12rem 0 rgba(255, 255, 255, 0.35);
+    /* Mario-style "?" block (inspired) */
+    background: linear-gradient(180deg, #ffe95a 0%, #f0c010 40%, #d89608 100%);
+}
+
+.dte__mario-block__bricks {
+    position: absolute;
+    inset: 0.15rem 0.15rem 0.2rem 0.15rem;
+    pointer-events: none;
+    border-radius: 0.1rem;
+    /* Very light edge shading only — no stripe pattern (was reading as "lines" on small cards) */
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.06) 0%,
+        transparent 25% 75%,
+        rgba(0, 0, 0, 0.1) 100%
+    );
+    opacity: 0.5;
+}
+
+.dte__mario-block__rivet {
+    position: absolute;
+    z-index: 1;
+    display: block;
+    width: 0.45rem;
+    min-width: 0.45rem;
+    height: 0.45rem;
+    min-height: 0.45rem;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #9e9e9e, #2a2a2a 55%, #0a0a0a 100%);
+    box-shadow: inset 0 0.04rem 0.06rem rgba(255, 255, 255, 0.45);
+    border: 0.04rem solid #202020;
+}
+
+.dte__mario-block__rivet--tl {
+    top: 0.2rem;
+    left: 0.2rem;
+}
+.dte__mario-block__rivet--tr {
+    top: 0.2rem;
+    right: 0.2rem;
+}
+.dte__mario-block__rivet--bl {
+    bottom: 0.2rem;
+    left: 0.2rem;
+}
+.dte__mario-block__rivet--br {
+    bottom: 0.2rem;
+    right: 0.2rem;
+}
+
+.dte__mario-block__q {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 50%;
+    display: block;
+    transform: translate(-50%, -50%);
+    font-size: clamp(2.8rem, 8vw, 4.4rem);
+    font-weight: 900;
+    line-height: 1;
+    font-family: "Segoe UI", "Arial Black", "Arial", sans-serif;
+    color: #fff;
+    -webkit-text-stroke: 0.16rem #202220;
+    text-shadow: 0.1rem 0.12rem 0 rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.02em;
+    pointer-events: none;
+}
+
+.dte__face--front {
+    background: #fff;
+    color: var(--ink);
+    transform: rotateY(180deg);
+    border: 0.15rem solid #dbe2f0;
+}
+
+.dte__status {
+    text-align: center;
+    min-height: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1.25rem;
+    color: var(--ink);
+}
+
+.dte__control-panel {
+    background: #fff;
+    border-radius: 0.75rem;
+    padding: 0.9rem 1.1rem 0.85rem;
+    box-shadow: 0 0.08rem 0.3rem rgba(0, 0, 0, 0.06);
+    margin-bottom: 0.6rem;
+    border: 0.06rem solid #e2e8f0;
+}
+
+.dte__control-panel--locked {
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+.dte__h2 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 0.65rem;
+}
+
+.dte__field {
+    margin-bottom: 0.6rem;
+}
+
+.dte__field--last {
+    margin-bottom: 0;
+}
+
+.dte__field--row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    margin-bottom: 0;
+    align-items: flex-end;
+}
+
+.dte__field--row .dte__field--grow {
+    flex: 1 1 10rem;
+    margin-bottom: 0;
+}
+
+.dte__field--inline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    margin-bottom: 0;
+}
+
+.dte__label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+}
+
+.dte__field--inline .dte__label {
+    margin-bottom: 0;
+}
+
+.dte__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.25rem;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.dte__options label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.dte__input {
+    width: 6rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 1rem;
+    border: 0.1rem solid #cbd5e1;
+    border-radius: 0.4rem;
+}
+
+.dte__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 0.75rem;
+    justify-content: center;
+    margin-bottom: 1.1rem;
+}
+
+.dte__btn {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.55rem 1.15rem;
+    border-radius: 0.5rem;
+    border: 0.1rem solid #cbd5e1;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.dte__btn:hover {
+    background: #f1f5f9;
+}
+
+.dte__btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.dte__btn--primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.dte__btn--primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+@media (max-width: 520px) {
+    .dte__row {
+        gap: 0.5rem;
+    }
+}

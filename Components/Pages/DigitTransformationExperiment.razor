@@ -1,0 +1,105 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Digit transformation practice</PageTitle>
+
+<div class="dte">
+    <header class="dte__header">
+        <h1 class="dte__title">Digit transformation</h1>
+        <p class="dte__subtitle">Top row: one card flips per beat while you listen. Bottom row: say your four answers in time (no voice), then a long beat — all cards reveal together.</p>
+    </header>
+
+    <div class="dte__control-panel @( _sequenceInProgress ? "dte__control-panel--locked" : null)">
+        <h2 class="dte__h2">Settings</h2>
+        <div class="dte__field">
+            <span class="dte__label">Mode</span>
+            <div class="dte__options">
+                <label><input type="radio" name="mode" value="@nameof(PresentationMode.ShowOnly)" @onchange="OnModeChange" checked="@(Model.Mode == PresentationMode.ShowOnly)" disabled="@_sequenceInProgress" /> Show only</label>
+                <label><input type="radio" name="mode" value="@nameof(PresentationMode.ReadOnly)" @onchange="OnModeChange" checked="@(Model.Mode == PresentationMode.ReadOnly)" disabled="@_sequenceInProgress" /> Read only</label>
+                <label><input type="radio" name="mode" value="@nameof(PresentationMode.ReadAndShow)" @onchange="OnModeChange" checked="@(Model.Mode == PresentationMode.ReadAndShow)" disabled="@_sequenceInProgress" /> Read and show</label>
+            </div>
+        </div>
+        <div class="dte__field">
+            <span class="dte__label">Operation</span>
+            <div class="dte__options">
+                <label><input type="radio" name="op" value="Add1" @onchange="OnOpChange" checked="@(Model.Operation == TransformationOperation.Add1)" disabled="@_sequenceInProgress" /> +1</label>
+                <label><input type="radio" name="op" value="Add3" @onchange="OnOpChange" checked="@(Model.Operation == TransformationOperation.Add3)" disabled="@_sequenceInProgress" /> +3</label>
+            </div>
+        </div>
+        <div class="dte__field dte__field--row">
+            <div class="dte__field dte__field--inline dte__field--grow">
+                <label class="dte__label" for="beatHz">Beat frequency (Hz)</label>
+                <input id="beatHz" class="dte__input" type="number" min="0.2" max="3.4" step="0.1" value="@FormatBeatHz()" @oninput="OnBeatHzInput" disabled="@_sequenceInProgress" />
+            </div>
+            <div class="dte__field dte__field--inline dte__field--grow">
+                <label class="dte__label" for="beatMs">Beat (ms)</label>
+                <input id="beatMs" class="dte__input" type="number" min="300" max="5000" step="50" value="@_beatInput" @oninput="OnBeatMsInput" disabled="@_sequenceInProgress" />
+            </div>
+        </div>
+    </div>
+
+    <div class="dte__actions">
+        @if (Model.Phase != ExperimentPhase.Reveal)
+        {
+            <button class="dte__btn dte__btn--primary" type="button" @onclick="OnStartOrRestartAsync">@StartButtonLabel</button>
+        }
+        @if (Model.Phase == ExperimentPhase.Reveal)
+        {
+            <button class="dte__btn dte__btn--primary" type="button" @onclick="OnReplayAsync">Replay</button>
+            <button class="dte__btn" type="button" @onclick="OnNewRoundAsync">New round</button>
+        }
+    </div>
+
+    <div class="dte__metronome" aria-hidden="true">
+        <div class="dte__beat-ring @BeatRingClass"
+             style="@BeatRingStyle"></div>
+    </div>
+
+    @if (Model.Phase == ExperimentPhase.Countdown && Model.CountdownValue is { } c)
+    {
+        <div class="dte__countdown-display" role="status">@c</div>
+    }
+
+    <section class="dte__cards" aria-live="polite">
+        <div class="dte__row" aria-label="Seed digits">
+            @for (var i = 0; i < DigitTransformationExperimentModel.SeedCount; i++)
+            {
+                var index = i;
+                <div class="dte__card @GetTopCardClass(index)">
+                    <div class="dte__card-inner @GetFlipClass(IsTopRowFaceUp(index))">
+                        <div class="dte__face dte__face--back dte__mario-block" aria-hidden="true">
+                            <span class="dte__mario-block__rivet dte__mario-block__rivet--tl"></span>
+                            <span class="dte__mario-block__rivet dte__mario-block__rivet--tr"></span>
+                            <span class="dte__mario-block__rivet dte__mario-block__rivet--bl"></span>
+                            <span class="dte__mario-block__rivet dte__mario-block__rivet--br"></span>
+                            <span class="dte__mario-block__bricks"></span>
+                            <span class="dte__mario-block__q">?</span>
+                        </div>
+                        <div class="dte__face dte__face--front">@Model.SeedDigits[index]</div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="dte__row" aria-label="Answer digits">
+            @for (var i = 0; i < DigitTransformationExperimentModel.SeedCount; i++)
+            {
+                var index = i;
+                <div class="dte__card @GetBottomCardClass(index)">
+                    <div class="dte__card-inner @GetFlipClass(IsBottomRowFaceUp(index))">
+                        <div class="dte__face dte__face--back dte__mario-block" aria-hidden="true">
+                            <span class="dte__mario-block__rivet dte__mario-block__rivet--tl"></span>
+                            <span class="dte__mario-block__rivet dte__mario-block__rivet--tr"></span>
+                            <span class="dte__mario-block__rivet dte__mario-block__rivet--bl"></span>
+                            <span class="dte__mario-block__rivet dte__mario-block__rivet--br"></span>
+                            <span class="dte__mario-block__bricks"></span>
+                            <span class="dte__mario-block__q">?</span>
+                        </div>
+                        <div class="dte__face dte__face--front">@Model.AnswerDigits[index]</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <p class="dte__status" role="status">@Model.StatusText</p>
+</div>
